@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.doe.paxttolllib.domain.doecard.samndfelica.SamResponseAndCodeModelClass;
 import com.doe.paxttolllib.domain.doecard.samndfelica.Utils;
+import com.doe.paxttolllib.domain.doecard.samndfelica.felica.genericdatautils.GenericDataUtils;
 import com.doe.paxttolllib.domain.doecard.samndfelica.felica.servicecodes.BalanceDataCodes;
 import com.doe.paxttolllib.domain.doecard.samndfelica.felica.servicecodes.GenericDataCodes;
 import com.doe.paxttolllib.domain.doecard.samndfelica.felica.servicecodes.TollSpecificDataCodes;
@@ -20,6 +21,7 @@ import com.doe.paxttolllib.domain.models.ErrorResponseClasses.FelicaResponse;
 import com.doe.paxttolllib.domain.models.TollDataModelClasses.TollDataModelClass;
 import com.doe.paxttolllib.domain.models.TollDataModelClasses.TollTransactionDataModelClass;
 import com.doe.paxttolllib.domain.models.TollScreenModelClass;
+import com.doe.paxttolllib.domain.models.genericdata.GenericDataPojoResponse;
 import com.doe.paxttolllib.domain.models.tollpass.StaticTollPassDetailPojo;
 import com.doe.paxttolllib.domain.models.tollpass.StaticTollPassDetailsResponse;
 import com.doe.paxttolllib.domain.models.tollpass.TemporaryTollPassPojo;
@@ -1436,6 +1438,64 @@ public class FelicaOperations {
             return setFelicaResponse(true, "success");
         } else {
             return setFelicaResponse(false, "unknown error");
+        }
+
+    }
+
+    public GenericDataPojoResponse getGenericData() throws IOException, RemoteException {
+
+        long val = pollingFelicaCard();
+        if (val == APP_ERROR) {
+            return GenericDataUtils.setGenericDataPojoResponseError("Polling error");
+        }
+
+        int numOfService = 4;
+        int numOfBlocks = 8;
+
+        GenericDataCodes genericDataCodes = new GenericDataCodes();
+        TransactionDataCodes ptDataCodes = new TransactionDataCodes();
+
+        ByteArrayOutputStream serviceList = new ByteArrayOutputStream();
+        serviceList.write(genericDataCodes.getSrvCodeUserData1Enc());
+        serviceList.write(genericDataCodes.getSrvCodeUserData2Enc());
+        serviceList.write(genericDataCodes.getSrvCodeCardNumEnc());
+        serviceList.write(new BalanceDataCodes().getSrvCodeBalanceDAEnc());
+
+        ByteArrayOutputStream blockList = new ByteArrayOutputStream();
+        blockList.write((byte) 0x80);            //Name(16)
+        blockList.write((byte) 0x00);
+        blockList.write((byte) 0x80);            //Name(16)
+        blockList.write((byte) 0x01);
+        blockList.write((byte) 0x80);            //Name(16)
+        blockList.write((byte) 0x02);
+        blockList.write((byte) 0x80);            //Vehicle type(1), Status(1), Version(1), Gender(1), DOB(4), Expiry DateTime(4), LastSyncedTime(4)
+        blockList.write((byte) 0x03);
+        blockList.write((byte) 0x80);            //Vehicle Number(16)
+        blockList.write((byte) 0x04);
+
+        blockList.write((byte) 0x81);            //Card issue date time(4), Ph no(6), Aadhaar id(5), Unused(1)
+        blockList.write((byte) 0x00);
+
+        blockList.write((byte) 0x82);            //Card Number(16)
+        blockList.write((byte) 0x00);
+
+        blockList.write((byte) 0x83);            //Card Balance(16)
+        blockList.write((byte) 0x00);
+
+
+        //Mutual authentication between SAM and Felica Card
+        if (!mutualAuthWithFelicaV2(numOfService, serviceList.toByteArray())) {
+            Timber.e("getGenericData mutual authentication failed");
+            return GenericDataUtils.setGenericDataPojoResponseError("mutual authentication failed");
+        }
+
+        byte[] response = readDataViaAuth(numOfBlocks, blockList.toByteArray());
+        if (response.length > 0) {
+            Timber.d("getGenericData successful");
+            return GenericDataUtils.getGenericDataPojoResponse(response);
+        } else {
+            Timber.d("getGenericData successful but response length is 0");
+            return GenericDataUtils.setGenericDataPojoResponseError("unknown error");
         }
 
     }
