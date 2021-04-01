@@ -6,13 +6,7 @@ public class GenericDataPojo {
     private int cardStatus_Int;
     private int cardVersion_Int;
 
-    public int getGender_Int() {
-        return gender_Int;
-    }
-
-    public void setGender_Int(int gender_Int) {
-        this.gender_Int = gender_Int;
-    }
+    private Long cardExpiryDateLong;
 
     @Override
     public String toString() {
@@ -21,6 +15,9 @@ public class GenericDataPojo {
                 ", writeDataFor=" + writeDataFor +
                 ", cardStatus_Int=" + cardStatus_Int +
                 ", cardVersion_Int=" + cardVersion_Int +
+                ", cardExpiryDateLong=" + cardExpiryDateLong +
+                ", lastSyncTimeLong=" + lastSyncTimeLong +
+                ", dobLong=" + dobLong +
                 ", cardBalance_Int=" + cardBalance_Int +
                 ", vehicleType_Int=" + vehicleType_Int +
                 ", vehicleSubType_String='" + vehicleSubType_String + '\'' +
@@ -44,6 +41,42 @@ public class GenericDataPojo {
                 ", forActivate=" + forActivate +
                 '}';
     }
+
+    public Long getCardExpiryDateLong() {
+        return cardExpiryDateLong;
+    }
+
+    public void setCardExpiryDateLong(Long cardExpiryDateLong) {
+        this.cardExpiryDateLong = cardExpiryDateLong;
+    }
+
+    public Long getLastSyncTimeLong() {
+        return lastSyncTimeLong;
+    }
+
+    public void setLastSyncTimeLong(Long lastSyncTimeLong) {
+        this.lastSyncTimeLong = lastSyncTimeLong;
+    }
+
+    public Long getDobLong() {
+        return dobLong;
+    }
+
+    public void setDobLong(Long dobLong) {
+        this.dobLong = dobLong;
+    }
+
+    private Long lastSyncTimeLong;
+    private Long dobLong;
+
+    public int getGender_Int() {
+        return gender_Int;
+    }
+
+    public void setGender_Int(int gender_Int) {
+        this.gender_Int = gender_Int;
+    }
+
 
     public int getWriteDataFor() {
         return writeDataFor;

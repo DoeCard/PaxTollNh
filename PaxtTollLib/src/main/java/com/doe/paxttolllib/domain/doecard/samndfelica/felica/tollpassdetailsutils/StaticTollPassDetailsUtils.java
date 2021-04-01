@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class StaticTollPassDetailsUtils {
 
     //From branch id(4),To branch id(4),Num trips(2),Expiry DateTime(4),Pass type(1),Limit periodicity(1)
@@ -16,6 +18,7 @@ public class StaticTollPassDetailsUtils {
     // Limits max count return journey(2),limits remaining count return journey(2),limits start DateTime return journey(4)
 
     public static StaticTollPassDetailsResponse getStaticTollPassDetails(byte[] data) {
+        Timber.d("getStaticTollPassDetails data=%s ", Utils.bytesToHexString(data));
         List<StaticTollPassDetailPojo> list = new LinkedList<>();
         int blockNumber=0;
 
@@ -31,7 +34,7 @@ public class StaticTollPassDetailsUtils {
 
             staticTollPassDetailPojo.setLimitMaxCount((int) Utils.bytesToLong(Arrays.copyOfRange(data, i + 16, i + 18), 2));
             staticTollPassDetailPojo.setLimitRemainingCount((int) Utils.bytesToLong(Arrays.copyOfRange(data, i + 18, i + 20), 2));
-            staticTollPassDetailPojo.setLimitStartDateTIme(Utils.bytesToLong(Arrays.copyOfRange(data, i + 20, 1 + 24), 4));
+            staticTollPassDetailPojo.setLimitStartDateTIme(Utils.bytesToLong(Arrays.copyOfRange(data, i + 20, i + 24), 4));
 
             staticTollPassDetailPojo.setLimitMaxCountReturnJourney((int) Utils.bytesToLong(Arrays.copyOfRange(data, i + 24, i + 26), 2));
             staticTollPassDetailPojo.setLimitRemainingCountReturnJourney((int) Utils.bytesToLong(Arrays.copyOfRange(data, i + 26, i + 28), 2));

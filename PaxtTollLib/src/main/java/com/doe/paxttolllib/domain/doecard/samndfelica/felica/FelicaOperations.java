@@ -653,8 +653,7 @@ public class FelicaOperations {
 
     public boolean updateCard(CardDataModel cardDataModel) throws IOException, RemoteException {
 
-        //Log.e("cardDataModel========================================================", "==" + new Gson().toJson(cardDataModel));
-
+        Log.e("updateCard cardDataModel========================================================", "==" + new Gson().toJson(cardDataModel));
 
         pollingFelicaCard();
 
@@ -698,33 +697,36 @@ public class FelicaOperations {
         }
 
         //Vehicle type(1), Status(1), Version(1), Gender(1), DOB(4), Expiry Date(4), LastSyncedTime(4)
-//        blockData.write(mSam.bigIntToByteArray(cardDataModel.getVehicleType_Int()));
-//        blockData.write(mSam.bigIntToByteArray(cardDataModel.getCardStatus_Int()));
-//        blockData.write(mSam.bigIntToByteArray(cardDataModel.getCardVersion_Int()));
-//        blockData.write(mSam.bigIntToByteArray(cardDataModel.getGender_Int()));
-
         blockData.write(mSam.bigIntToByteArray(cardDataModel.getVehicleType_Int()));
         blockData.write((byte) cardDataModel.getCardStatus_Int());
         blockData.write(mSam.bigIntToByteArray(cardDataModel.getCardVersion_Int()));
         blockData.write(mSam.bigIntToByteArray(cardDataModel.getGender_Int()));
 
-        blockData.write(cardDataModel.getDob_String().getBytes());
+        /*utils.appendZeroStream(blockData, 4);
+        utils.appendZeroStream(blockData, 4);
+        utils.appendZeroStream(blockData, 4);*/
+
+        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getDobLong(), 4));
+        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getCardExpiryDateLong(), 4));
+        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getLastSyncTimeLong(), 4));
+
+       /* blockData.write(cardDataModel.getDob_String().trim().getBytes());
         if (cardDataModel.getDob_String().trim().getBytes().length < 4) {
             utils.appendZeroStream(blockData,
-                    4 - cardDataModel.getDob_String().getBytes().length);        //Remaining Blank bits of DOB
+                    4 - cardDataModel.getDob_String().trim().getBytes().length);        //Remaining Blank bits of DOB
         }
-        blockData.write(cardDataModel.getCardExpiryDate_String().getBytes());
+        blockData.write(cardDataModel.getCardExpiryDate_String().trim().getBytes());
         if (cardDataModel.getCardExpiryDate_String().trim().getBytes().length < 4) {
             utils.appendZeroStream(blockData,
-                    4 - cardDataModel.getCardExpiryDate_String().getBytes().length);        //Remaining Blank bits of Expiry Date
+                    4 - cardDataModel.getCardExpiryDate_String().trim().getBytes().length);        //Remaining Blank bits of Expiry Date
         }
-        blockData.write(cardDataModel.getLastSyncTime_String().getBytes());
+        blockData.write(cardDataModel.getLastSyncTime_String().trim().getBytes());
         if (cardDataModel.getLastSyncTime_String().trim().getBytes().length < 4) {
             utils.appendZeroStream(blockData,
-                    4 - cardDataModel.getLastSyncTime_String().getBytes().length);        //Remaining Blank bits of LastSyncedTime
-        }
+                    4 - cardDataModel.getLastSyncTime_String().trim().getBytes().length);        //Remaining Blank bits of LastSyncedTime
+        }*/
 
-        // Log.e("1 blockData============================================== " + blockData.size(), "===" + bytesToHexString(blockData.toByteArray()));
+         Log.e("1 blockData============================================== " + blockData.size(), "===" + bytesToHexString(blockData.toByteArray()));
 
         //Vehicle Number(16)
         if (cardDataModel.getVehicleNumber_String().trim().getBytes().length < 16) {
@@ -736,30 +738,20 @@ public class FelicaOperations {
         } else {
             blockData.write(cardDataModel.getVehicleNumber_String().trim().getBytes());
         }
-//
-//
-//        //Card issue date time(4), Ph no(6), Aadhaar id(5), Unused(1)
-//        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getCardIssueDateTime_Long(), 4));
-////        if (cardDataModel.getCardIssueDateTime_String().getBytes().length < 4) {
-////            utils.appendZeroStream(blockData,
-////                    4 - cardDataModel.getCardIssueDateTime_String().getBytes().length);        //Remaining Blank bits of Card issue date time
-////        }
-//        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getMobileNumber_Long(), 6));
-//        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getAadhaarNumber_Long(), 5));
-//        blockData.write((byte) 0);
 
 
         if (!mutualAuthWithFelicaV2(numOfService, serviceList.toByteArray())) {
+            Log.e("updateCard","mutual authentication failed");
             return false;
         }
 
-        // Log.e("blockData============================================== " + blockData.size(), "===" + bytesToHexString(blockData.toByteArray()));
+         Log.e("updateCard blockData============================================== " + blockData.size(), "===" + bytesToHexString(blockData.toByteArray()));
 
         byte[] res = writeDataBlock(numOfBlocks, blockList.toByteArray(), blockData.toByteArray());
 
         return res[0] == (byte) 0x00 && res[1] == (byte) 0x00;
 
-//        return true;
+//
     }
 
 
@@ -953,10 +945,25 @@ public class FelicaOperations {
         blockList.write((byte) 0x00);
 
         byte[] b = readDataWOAuth(numOfService, serviceList.toByteArray(), numOfBlocks, blockList.toByteArray());
-        int balance=ByteBuffer.wrap(Arrays.copyOfRange(b, 0, 4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-        Timber.d("readBalance balance= %s",balance);
+        int balance = ByteBuffer.wrap(Arrays.copyOfRange(b, 0, 4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        Timber.d("readBalance balance= %s", balance);
 
         return balance;
+    }
+    private void getExecutionIdFromCard() throws IOException, RemoteException {
+        int numOfService = 1;
+        int numOfBlocks = 1;
+        BalanceDataCodes genericDataCodes = new BalanceDataCodes();
+        ByteArrayOutputStream serviceList = new ByteArrayOutputStream();
+        serviceList.write(genericDataCodes.getSrvCodeBalanceReadWOEnc());
+
+        ByteArrayOutputStream blockList = new ByteArrayOutputStream();
+        blockList.write((byte) 0x80);            //card balance
+        blockList.write((byte) 0x00);
+
+        byte[] b = readDataWOAuth(numOfService, serviceList.toByteArray(), numOfBlocks, blockList.toByteArray());
+        executionId = Arrays.copyOfRange(b, 14, 16);
+        Timber.d("getExecutionIdFromCard executionId= %s", bytesToHexString(executionId));
     }
 
 
@@ -1302,6 +1309,7 @@ public class FelicaOperations {
     public FelicaResponse createTempPassWithDeduction(TemporaryTollPassPojo tollPassPojo, int amount, long terminalId) throws IOException, RemoteException {
         Timber.d("createTempPassWithDeduction %s", tollPassPojo.toString() + "amount=" + amount + "terminalId=" + terminalId);
         long val = pollingFelicaCard();
+        getExecutionIdFromCard();
         if (val == APP_ERROR) {
             return setFelicaResponse(false, "polling error");
         }

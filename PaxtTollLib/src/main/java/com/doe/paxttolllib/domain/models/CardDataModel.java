@@ -14,6 +14,41 @@ public class CardDataModel implements Serializable {
     private int cardVersion_Int;
     private int cardBalance_Int;
     private int vehicleType_Int;
+
+    @Override
+    public String toString() {
+        return "CardDataModel{" +
+                "gender_Int=" + gender_Int +
+                ", writeDataFor=" + writeDataFor +
+                ", cardStatus_Int=" + cardStatus_Int +
+                ", cardVersion_Int=" + cardVersion_Int +
+                ", cardBalance_Int=" + cardBalance_Int +
+                ", vehicleType_Int=" + vehicleType_Int +
+                ", vehicleSubType_String='" + vehicleSubType_String + '\'' +
+                ", rechargeAmount_Int=" + rechargeAmount_Int +
+                ", vehicleMainType_String='" + vehicleMainType_String + '\'' +
+                ", singleJourneyAmt_Int=" + singleJourneyAmt_Int +
+                ", journeyAmt_Int=" + journeyAmt_Int +
+                ", cardNumber_Long=" + cardNumber_Long +
+                ", mobileNumber_Long=" + mobileNumber_Long +
+                ", aadhaarNumber_Long=" + aadhaarNumber_Long +
+                ", dob_String='" + dob_String + '\'' +
+                ", branchId_String='" + branchId_String + '\'' +
+                ", cardName_String='" + cardName_String + '\'' +
+                ", inDateTime_Long=" + inDateTime_Long +
+                ", lastSyncTime_String='" + lastSyncTime_String + '\'' +
+                ", cardIssuerId_String='" + cardIssuerId_String + '\'' +
+                ", vehicleNumber_String='" + vehicleNumber_String + '\'' +
+                ", cardExpiryDate_String='" + cardExpiryDate_String + '\'' +
+                ", cardIssueDateTime_Long=" + cardIssueDateTime_Long +
+                ", tollFeeExpiryDateTime_Long=" + tollFeeExpiryDateTime_Long +
+                ", dobLong=" + dobLong +
+                ", cardExpiryDateLong=" + cardExpiryDateLong +
+                ", lastSyncTimeLong=" + lastSyncTimeLong +
+                ", forActivate=" + forActivate +
+                '}';
+    }
+
     private String vehicleSubType_String;
     private int rechargeAmount_Int;
     private String vehicleMainType_String;
@@ -34,6 +69,35 @@ public class CardDataModel implements Serializable {
     private String cardExpiryDate_String;
     private Long cardIssueDateTime_Long;
     private Long tollFeeExpiryDateTime_Long;
+
+    private Long dobLong;
+
+    public Long getDobLong() {
+        return dobLong;
+    }
+
+    public void setDobLong(Long dobLong) {
+        this.dobLong = dobLong;
+    }
+
+    public Long getCardExpiryDateLong() {
+        return cardExpiryDateLong;
+    }
+
+    public void setCardExpiryDateLong(Long cardExpiryDateLong) {
+        this.cardExpiryDateLong = cardExpiryDateLong;
+    }
+
+    public Long getLastSyncTimeLong() {
+        return lastSyncTimeLong;
+    }
+
+    public void setLastSyncTimeLong(Long lastSyncTimeLong) {
+        this.lastSyncTimeLong = lastSyncTimeLong;
+    }
+
+    private Long cardExpiryDateLong;
+    private Long lastSyncTimeLong;
 
     private boolean forActivate;
 
