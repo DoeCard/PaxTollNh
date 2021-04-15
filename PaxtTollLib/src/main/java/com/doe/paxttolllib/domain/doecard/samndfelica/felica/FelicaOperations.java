@@ -655,7 +655,8 @@ public class FelicaOperations {
         blockData.write((byte) cardDataModel.getTransactionType());
         blockData.write(mSam.LongToCharArrayLen(Utility.getUTCSecond(), 4));
         new Utils().appendZeroStream(blockData, 2);
-        blockData.write(mSam.IntToCharArrayLE(cardDataModel.getRechargeAmount_Int(), 4));
+       // mSam.LongToCharArrayLen(amount, 4)
+        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getRechargeAmount_Int(), 4));
         blockData.write(mSam.LongToCharArrayLen(cardDataModel.getTerminalId(),4));
         blockData.write((byte) 0);
 
