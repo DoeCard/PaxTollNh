@@ -497,22 +497,36 @@ public class FelicaOperations {
 
     public boolean rechargeCard(RechargeRequestClass rechargeRequestClass) throws IOException, RemoteException {
 
-        int numOfService = 1;
-        int numOfBlocks = 1;
+        int numOfService = 2;
+        int numOfBlocks = 2;
 
         TransactionDataCodes ptDataCodes = new TransactionDataCodes();
 
         ByteArrayOutputStream serviceList = new ByteArrayOutputStream();
         serviceList.write(new BalanceDataCodes().getSrvCodeBalanceDAEnc());
+        serviceList.write(TransactionalLogsDataCodes.getSrvCodeTransationalLogsEnc());
 
         ByteArrayOutputStream blockList = new ByteArrayOutputStream();
         blockList.write((byte) 0x80);            //Card Balance(16)
+        blockList.write((byte) 0x00);
+
+        blockList.write((byte) 0x81);//cyclic log
         blockList.write((byte) 0x00);
 
         ByteArrayOutputStream blockData = new ByteArrayOutputStream();
 
         blockData.write(mSam.IntToCharArrayLE(Integer.parseInt(rechargeRequestClass.getAmount().getValue()), 4));
         new Utils().appendZeroStream(blockData, 12);
+
+        //writing transactional logs
+        blockData.write((byte) rechargeRequestClass.getTransactionType());
+        blockData.write(mSam.LongToCharArrayLen(Utility.getUTCSecond(), 4));
+        new Utils().appendZeroStream(blockData, 2);
+        //mSam.LongToCharArrayLen(amount, 4)
+        long amount= Long.parseLong(rechargeRequestClass.getAmount().getValue());
+        blockData.write(mSam.LongToCharArrayLen(amount, 4));
+        blockData.write(mSam.LongToCharArrayLen(rechargeRequestClass.getTerminalId(),4));
+        blockData.write((byte) 0);
 
         if (!mutualAuthWithFelicaV2(numOfService, serviceList.toByteArray())) {
             return false;
@@ -535,8 +549,8 @@ public class FelicaOperations {
             return false;
         }
 
-        int numOfService = 3;
-        int numOfBlocks = 7;
+        int numOfService = 4;
+        int numOfBlocks = 8;
 
         GenericDataCodes genericDataCodes = new GenericDataCodes();
         TransactionDataCodes ptDataCodes = new TransactionDataCodes();
@@ -545,7 +559,7 @@ public class FelicaOperations {
         serviceList.write(genericDataCodes.getSrvCodeUserData1Enc());
         serviceList.write(genericDataCodes.getSrvCodeUserData2Enc());
         serviceList.write(new BalanceDataCodes().getSrvCodeBalanceDAEnc());
-        //serviceList.write(genericDataCodes.getSrvCodeCardNumEnc());
+        serviceList.write(TransactionalLogsDataCodes.getSrvCodeTransationalLogsEnc());
 
         ByteArrayOutputStream blockList = new ByteArrayOutputStream();
         blockList.write((byte) 0x80);            //Name(16)
@@ -565,6 +579,8 @@ public class FelicaOperations {
         blockList.write((byte) 0x82);            //Card Balance(16)
         blockList.write((byte) 0x00);
 
+        blockList.write((byte) 0x83);            //cyclic logs
+        blockList.write((byte) 0x00);
 
         //blockList.write((byte) 0x83);            //Card Number(16)
         //blockList.write((byte) 0x00);
@@ -634,6 +650,14 @@ public class FelicaOperations {
         new Utils().appendZeroStream(blockData, 12);
 
         Log.e("Balance " + blockData.size(), bytesToHexString(blockData.toByteArray()));
+
+        //writing transactional logs
+        blockData.write((byte) cardDataModel.getTransactionType());
+        blockData.write(mSam.LongToCharArrayLen(Utility.getUTCSecond(), 4));
+        new Utils().appendZeroStream(blockData, 2);
+        blockData.write(mSam.IntToCharArrayLE(cardDataModel.getRechargeAmount_Int(), 4));
+        blockData.write(mSam.LongToCharArrayLen(cardDataModel.getTerminalId(),4));
+        blockData.write((byte) 0);
 
 
         //Card Number(16)

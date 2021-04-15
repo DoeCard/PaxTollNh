@@ -1,10 +1,9 @@
 package com.doe.paxttolllib.domain.models;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 
-/**
- * Created by eshantmittal on 23/01/18.
- */
 
 public class CardDataModel implements Serializable {
 
@@ -14,9 +13,18 @@ public class CardDataModel implements Serializable {
     private int cardVersion_Int;
     private int cardBalance_Int;
     private int vehicleType_Int;
+    private Long terminalId;
+
+    public Long getTerminalId() {
+        return terminalId;
+    }
+
+    public void setTerminalId(Long terminalId) {
+        this.terminalId = terminalId;
+    }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "CardDataModel{" +
                 "gender_Int=" + gender_Int +
                 ", writeDataFor=" + writeDataFor +
@@ -43,9 +51,11 @@ public class CardDataModel implements Serializable {
                 ", cardIssueDateTime_Long=" + cardIssueDateTime_Long +
                 ", tollFeeExpiryDateTime_Long=" + tollFeeExpiryDateTime_Long +
                 ", dobLong=" + dobLong +
+                "transactionType=" + transactionType +
                 ", cardExpiryDateLong=" + cardExpiryDateLong +
                 ", lastSyncTimeLong=" + lastSyncTimeLong +
                 ", forActivate=" + forActivate +
+                ",terminalId=" + terminalId +
                 '}';
     }
 
@@ -69,6 +79,16 @@ public class CardDataModel implements Serializable {
     private String cardExpiryDate_String;
     private Long cardIssueDateTime_Long;
     private Long tollFeeExpiryDateTime_Long;
+
+    public int getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(int transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    private int transactionType;
 
     private Long dobLong;
 

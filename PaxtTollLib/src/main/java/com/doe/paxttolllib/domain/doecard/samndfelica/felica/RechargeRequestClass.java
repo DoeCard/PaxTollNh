@@ -24,6 +24,26 @@ public class RechargeRequestClass {
     @Expose
     private String cardNumber;
 
+    private int transactionType;
+
+    public int getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(int transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    public Long getTerminalId() {
+        return terminalId;
+    }
+
+    public void setTerminalId(Long terminalId) {
+        this.terminalId = terminalId;
+    }
+
+    private Long terminalId;
+
     public String getMode() {
         return mode;
     }
